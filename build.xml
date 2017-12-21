@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="HELMAntibodyEditorPlugin" default="dist" basedir=".">
+	<description>Plugin build file</description>
+
+	<!-- global properties -->
+	<property name="src" location="source" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist/HabePlugin" />
+	<property name="lib" location="lib" />
+	<property name="jar" value="HabePlugin.jar" />
+
+	<!-- compile time and runtime classpath -->
+	<path id="classpath">
+		<fileset dir="${lib}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<!-- convert classpath to a property for the MANIFEST file             -->
+	<!-- transform the path from (semi-)colon separated to space separated -->
+	<manifestclasspath property="manifest.classpath" jarfile="${jar}">
+		<classpath refid="classpath" />
+	</manifestclasspath>
+
+
+	<!-- ANT targets -->
+	<target name="init">
+		<!-- create the build directory structure used by compile -->
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<!-- compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" source="1.7" target="1.7" debug="on" debuglevel="lines,vars,source" optimize="off">
+			<classpath>
+				<path refid="classpath" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="dist" depends="compile">
+		<mkdir dir="${dist}/lib" />
+		<!-- include source code into distributable jar -->
+		<copy todir="${build}">
+			<fileset dir="${src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<delete file="${dist}/${jar}" />
+		<!-- Put everything in ${build} into the HabePlugin.jar file -->
+		<jar jarfile="${dist}/${jar}" basedir="${build}" index="false">
+			<manifest>
+				<!--<attribute name="Main-Class" value="foobar" />-->
+				<attribute name="Class-Path" value="${manifest.classpath}" />
+			</manifest>
+		</jar>
+
+		<copy tofile="${jar}" file="${dist}/${jar}" />
+		<copy file="${lib}/Domain-Detection-0.1.9-SNAPSHOT.jar" tofile="${dist}/lib/DOMAIN-Detection-0.1.9-SNAPSHOT.jar" />
+	</target>
+
+	<!-- clean up -->
+	<target name="clean">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+		<delete file="${jar}" />
+	</target>
+</project>
